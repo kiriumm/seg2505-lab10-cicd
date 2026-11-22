@@ -1,16 +1,30 @@
 version: 2.1
 
 jobs:
-  say-hello:
+  build-and-test:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/android:2026.07
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Rendre gradlew executable"
+          command: chmod +x ./gradlew
+      - run:
+          name: "Lancer les tests unitaires"
+          command: ./gradlew testDebugUnitTest
+      - run:
+          name: "Construire l'APK"
+          command: ./gradlew assembleDebug
+      - store_test_results:
+          path: app/build/test-results
+      - store_artifacts:
+          path: app/build/reports/tests
+          destination: rapports-tests
+      - store_artifacts:
+          path: app/build/outputs/apk/debug
+          destination: apk
 
 workflows:
-  say-hello-workflow:
+  build-and-test-workflow:
     jobs:
-      - say-hello
+      - build-and-test
